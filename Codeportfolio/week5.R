@@ -20,14 +20,14 @@ sd(AP[7:138] - AP.decom$trend[7:138])
 
 #*****************************************
 #Question 4 from weekly quiz 
+#Checking the mean, std dev and covariance of variables in the given dataset
+
 mean(varnish$y)
 sd(varnish$y)
 cov(varnish$x,varnish$y)
 
 plot(guesswhat$x,guesswhat$y)
 cor(guesswhat$x,guesswhat$y)
-
-sd
 
 #Question 7 from weekly quiz
 #Using cbe dataset to plot chocolate product time series
