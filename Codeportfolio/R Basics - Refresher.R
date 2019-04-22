@@ -2,15 +2,15 @@
 #*********************************************
 
 # Data types in R
+# In addition to the below exercises, R swirl is helpful to learn R basics
 
-
-# Change my_numeric to be 42
+# creating a numeric variable
 my_numeric <- 42
 
-# Change my_character to be "universe"
+# Creating a char variable
 my_character <- "universe"
 
-# Change my_logical to be FALSE
+# Assigning my_logical to be FALSE
 my_logical <- FALSE
 
 # Understanding how arithmetic operations work in R
@@ -32,8 +32,6 @@ my_logical <- FALSE
 
 # Modulo
 28 %% 6
-
-
 
 #***************************************
 
