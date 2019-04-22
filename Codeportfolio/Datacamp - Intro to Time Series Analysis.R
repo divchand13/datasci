@@ -4,10 +4,10 @@
 # Print the Nile dataset
 print(Nile)
 
-# List the number of observations in the Nile dataset
+# List the number of observations in the Nile dataset. This function is very helpful to understand length of variables
 length(Nile)
 
-# Display the first 10 elements of the Nile dataset
+# Display the first 10 elements of the Nile dataset. This can be used to see how a dataset looks/if import looks correct
 head(Nile, n=10)
 
 # Display the last 12 elements of the Nile dataset
@@ -49,10 +49,15 @@ end(AirPassengers)
 
 
 # Use time(), deltat(), frequency(), and cycle() with AirPassengers 
+# these functions are helpful to understand timeseries datasets better.
 time(AirPassengers)
 deltat(AirPassengers)
 frequency(AirPassengers)
 cycle(AirPassengers)
+
+#Note:time creates the vector of times at which a time series was sampled.
+#cycle gives the positions in the cycle of each observation.
+#frequency returns the number of samples per unit time and deltat the time interval between observations
 
 #**************************************
 # Learning to deal with missing values
