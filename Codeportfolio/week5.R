@@ -1,5 +1,5 @@
-#Chapter 2 - Week5 Time Series Cowpertwait 
-
+#Chapter 2 - Time Series Cowpertwait : Week5 of coursework
+ 
 
 #Learning about correlograms
 #Importing data
