@@ -1,0 +1,221 @@
+---
+title: "Time Series Analysis - Project"
+author: "Divya Chandrashekar"
+date: "April 25, 2019"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,error =TRUE)
+
+```
+
+Installing required packages
+```{r}
+install.packages("astsa")
+install.packages("devtools")
+devtools::install_github("nickpoison/astsa")
+
+library(astsa)
+```
+
+##1. Data Description
+
+a) Data Source:U.S. Unemployment. Astsa package. Dataset - unemp
+ 
+```{r unemp}
+unemp<-astsa::unemp
+```
+
+b) Variable Description
+
+Monthly U.S. Unemployment series (1948-1978, n = 372)
+```{r}
+summary(unemp)
+#checking class to confirm it is a ts
+class(unemp)
+```
+
+c) ts description
+
+```{r}
+start(unemp)
+
+end(unemp)
+
+frequency(unemp)
+```
+From these results it can be see that the series starts with 1948 January and ends at 1978 December, once cycle is 12 months.
+
+
+##2. Data Exploration
+
+a) Plotting data
+
+```{r message=FALSE, echo=FALSE}
+plot(unemp, ylab = "Unemployment",main="US Unemployment over time")
+```
+
+
+```{r message=FALSE, echo=FALSE}
+plot(unemp,ylab = "Unemployment",main="US Unemployment over time (with trend line")
+abline(reg=lm(unemp~time(unemp))) # fit a trend line
+```
+
+For further EDA,
+Box plot across months to explore seasonal effects 
+(Also aggregating annualy)
+
+```{r message=FALSE, echo=FALSE}
+plot(aggregate(unemp), ylab = "Unemplyment Annual",main="Annal US Unemployment over time")
+boxplot(unemp ~ cycle(unemp),ylab="US Unemployment",main="Boxplot of Unemployment across months")
+```
+
+
+From the preliminary plot of raw data, an increasing trend can be observed.
+From the boxplot across months, highest unemployment is observed in June. 
+
+
+b)Transforming data
+
+Differencing the unemployment data and plotting it
+```{r message=FALSE, echo=FALSE}
+d_unemp <- diff(unemp)
+plot(d_unemp, main ="Unemplyment data plot (difference)")
+```
+
+Seasonally differencing d_unemp and plotting it
+```{r}
+dd_unemp <- diff(d_unemp, lag = 12)  
+plot(dd_unemp,main="Unemplyment data plot (seasonal difference)")
+```
+
+
+By differencing, the trend and seasonal variation in unemployment have been removed.
+The series now appears to be stationary.
+
+##3. Data Decomposition
+
+Decomposing series into trend, seasonal and residual components
+and plotting these
+
+```{r message=FALSE, echo=FALSE}
+plot(decompose(unemp))
+u<-decompose(unemp)
+
+trend<-u$trend
+seasonal<-u$seasonal
+residual<-u$random
+
+
+plot(trend,ylab="US Unemployment",main="Plot of Unemployment trend")
+plot(seasonal,ylab="US Unemployment",main="Plot of Unemployment seasonal")
+plot(residual,ylab="US Unemployment",main="Plot of Unemployment residuals")
+
+ts.plot(cbind(trend, trend+seasonal, main="Unemployment - trend, trend+seasonal"), lty=1:2)
+```
+
+Since the series shows an increasing trend, but seasonal effect does not, an additive decomposition model looks appropriate.
+The residuals seem to show an increasing trend, so a transformation (log) can be considered.
+
+##4.Regression
+
+Regressing unemployment data on time
+```{r}
+fit <- lm(unemp~time(unemp), na.action=NULL)
+
+summary(fit)
+
+summary(aov(fit))
+num = length(unemp)
+
+
+AIC(fit)/num - log(2*pi) # AIC
+BIC(fit)/num - log(2*pi) # BIC
+(AICc = log(sum(resid(fit)^2)/num) + (num+5)/(num-5-2)) # AICc
+
+#Preparing Residual Plot
+
+fit.rs=resid(fit)
+
+plot(time(unemp), fit.rs,main="Residual plot") 
+abline(0, 0) 
+
+#Plotting acf and pacf
+acf(resid(fit))
+pacf(resid(fit))
+
+
+```
+
+Interpretation of linear regression model:
+
+The adjusted R square of the model is 0.49 the closer it gets to 1 better the model fits the data.Transformations such as log or taking a difference may result in a model with higher R squared value.
+
+The slow linear decay of the ACF plot is typical of a non-stationary time series.
+
+##5.ARIMA model
+
+Differencing the data and plotting it
+
+```{r message=FALSE, echo=FALSE}
+plot(unemp, main="Unemployment")
+d_unemp <- diff(unemp)
+plot(d_unemp,"Unemployment (difference)")
+```
+
+Seasonally difference d_unemp and plot it
+
+```{r message=FALSE, echo=FALSE}
+d_unemp <- diff(unemp)
+dd_unemp <- diff(d_unemp, lag = 12)  
+plot(dd_unemp,main="Unemployment - seasonal difference")
+```
+
+The data appears to be stationary.Plotting P/ACF pair of fully differenced data to lag 60
+
+
+```{r message=FALSE, echo=FALSE,include=TRUE}
+dd_unemp <- diff(diff(unemp), lag = 12)
+acf2(dd_unemp)
+sarima(unemp, p=2,d=1,q=0,P=0,D=1,Q=1,S=12)
+```
+
+For the nonseasonal component:  PACF cuts off at lag 2 and the ACF tails off and in the seasonal component: the ACF cuts off at lag 12 and the PACF tails off at lags 12, 24, 36 etc.
+
+
+##6.Model Diagnostics
+
+Ploting P/ACF pair of fully differenced data to lag 60
+
+
+```{r message=FALSE, echo=FALSE,include=TRUE}
+dd_unemp <- diff(diff(unemp), lag = 12)
+acf2(dd_unemp)
+sarima(unemp, p=0,d=0,q=0,P=0,D=0,Q=1,S=12)
+
+```
+```{r message=FALSE, echo=FALSE,include=TRUE}
+dd_unemp <- diff(diff(unemp), lag = 12)
+acf2(dd_unemp)
+sarima(unemp, p=1,d=1,q=0,P=0,D=0,Q=1,S=12)
+
+```
+
+
+```{r message=FALSE, echo=FALSE,include=TRUE}
+dd_unemp <- diff(diff(unemp), lag = 12)
+acf2(dd_unemp)
+sarima(unemp, p=2,d=2,q=0,P=0,D=0,Q=1,S=12)
+
+```
+
+Based on the above models,the first arima model (p=2,d=1,q=0,P=0,D=1,Q=1,S=12) has the best fit.The AIC and BIC values for it are lowest (AIC=7.12457 and BIC=6.156174)
+From this model, residuals are small in magnitude, appear to be uncorrelated close to normal and have a mean near zero.
+
+
+
+
